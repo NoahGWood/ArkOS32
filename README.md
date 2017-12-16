@@ -1,8 +1,8 @@
 # ArkOS32
-
 ## Welcome to ArkOS-32bit!
  Right now our operating system is very small, just enough to display a line or two of text and loop until interrupted.
-
+ ![Alt text](/images/grub_screen.png?raw=true "short and sweet")
+ ![Alt text](/images/OS.png?raw=true "short and sweet")
 ## Pre-requisites:
  The included iso should run on any x86 computer.
  If you want to make changes to the source code you'll need to do some work.
@@ -11,7 +11,7 @@
  (incomplete)
 
 ## I want to steal your code!
- Go for it! All files uploaded here are completely open sourced and unlicensed.
+ Go for it! All files uploaded here are open sourced and unlicensed with the exception of GRUB which contains its' own license.
 
 ## How do I make it mine/reskin your OS?
  In order to reskin the OS you will need to ensure you have all the Dev Requirements satisfied.
