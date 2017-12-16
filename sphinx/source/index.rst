@@ -9,6 +9,7 @@ Welcome to ArkOS's documentation!
 .. toctree::
 
    intro
+   coding-style
    :maxdepth: 2
    :caption: Contents:
 
