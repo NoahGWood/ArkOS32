@@ -3,6 +3,8 @@
 Ark kernel coding style
 =========================
 
+The Ark Kernel will follow the Linux Kernel coding style which is included, modified for Ark below:
+
 This is a short document describing the preferred coding style for the
 ark kernel.  Coding style is very personal, and I won't **force** my
 views on anybody, but this is what goes for anything that I have to be
