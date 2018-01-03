@@ -1,25 +1,28 @@
 #include <stdint.h>
 
+
+extern void loadPageDirectory(uint32_t*);
+extern void enablePaging();
+
 void page_init(void) {
-    uint32_t page_dir_ptr_tab[4] __attribute__((aligned(0x20))); // must be aligned to (at least)0x20, ...
-    // ... turning out that you can put more of them into one page, saving memory
-    // 512 entries
-    uint32_t page_dir[512] __attribute__((aligned(0x1000)));  // must be aligned to page boundary
-    uint32_t page_tab[512] __attribute__((aligned(0x1000)));
-    page_dir_ptr_tab[0] = (uint32_t)&page_dir | 1; // set the page directory into the PDPT and mark it present
-    page_dir[0] = (uint32_t)&page_tab | 3; //set the page table into the PD and mark it present/writable
-    unsigned int i, address = 0;
-    for(i = 0; i < 512; i++) {
-        page_tab[i] = address | 3; // map address and mark it present/writable
-        address = address + 0x1000;
+    uint32_t page_directory[1024] __attribute__((aligned(4096))); //create a page directory
+    //seteach entry to not present
+    int i;
+    for(i = 0; i < 1024; i++) {
+        page_directory[i] = 0x00000002;
     }
-    asm volatile ("movl %cr4, %eax; bts $5, %eax; movl %eax, %cr4"); // set bit5 in CR4 to enable PAE 
-    asm volatile ("movl %%eax, %%cr3" :: "a" (&page_dir_ptr_tab)); // load PDPT into CR3
-    asm volatile ("movl %cr0, %eax; orl $0x80000000, %eax; movl %eax, %cr0;");
-//    uint32_t * page_dir = (uint32_t*)page_dir_ptr_tab[3]; // get the page directory (you should 'and' the flags away)
-//    page_dir[511] = (uint32_t)page_dir; // map pd to itself
-//    page_dir[510] = page_dir_ptr_tab[2]; // map pd3 to it
-//    page_dir[509] = page_dir_ptr_tab[1]; // map pd2 to it
-//    page_dir[508] = page_dir_ptr_tab[0]; // map pd1 to it
-//    page_dir[507] = (uint32_t)&page_dir_ptr_tab; /* map the PDPT to the directory
+    // Create page tables
+    uint32_t first_page_table[1024] __attribute__((aligned(4096)));
+    // holds physical address we start mapping
+    // for the first we'll map to the very beginning of memory
+    unsigned int x;
+    // fill all 1024 entries in the table, mapping 4MB
+    for(x = 0; x < 1024; x++) {
+        first_page_table[x] = (x * 0x1000) | 3;
+    }
+    // insert page table to page dir
+    page_directory[0] = ((unsigned int) first_page_table) | 3;
+    loadPageDirectory(page_directory);
+    enablePaging();
+    printf("Paging Enabled Successfully\n");
 }

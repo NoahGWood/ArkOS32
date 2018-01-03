@@ -1,0 +1,32 @@
+Malloc() {
+    find free block
+    mark as used
+    return address
+}
+
+EXPANDED Malloc() {
+    1. start with a pointer at the beginning of free memory
+    2. Does header have an End of Memory status?
+        Yes:
+            Allocate a new page
+        No:
+            Return with an error
+    3. Does this header say memory is free?
+        Yes:
+            Is (address of next header - (address of this header - size of header)) larger than size wanted?
+                Yes:
+                    Free Block
+                No:
+                    Point to next block and go back to step 2.
+        No:
+            Point to the next block and go back to step 2.
+
+
+free() {
+    search for memory address and set bit to free
+    go to next block
+        is it free?
+            Yes:
+                loop
+            No:
+                Set current block's next pointer to used block, skipping over free blocks to merge them.
