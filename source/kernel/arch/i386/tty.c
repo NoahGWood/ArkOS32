@@ -52,9 +52,11 @@ void terminal_putchar(char c) {
         if (terminal_row == VGA_HEIGHT) {
             terminal_scroll();
         }
-        terminal_column = 0;
-        terminal_row++;
-        return;
+        else {
+            terminal_column = 0;
+            terminal_row++;
+            return;
+        }
     }
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
