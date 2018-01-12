@@ -35,14 +35,42 @@ _start:
 
 	# Hang if kernel_main unexpectedly returns.
 	cli
-1:	hlt
+1: hlt
 	jmp 1b
 .size _start, . - _start
+
+# Load Page Directories
+.text
+.globl loadPageDirectory
+loadPageDirectory:
+push %ebp
+mov %esp, %ebp
+mov 8(%esp), %eax
+mov %eax, %cr3
+mov %ebp, %esp
+pop %ebp
+ret
+
+# Should setup paging before the rest, no?
+# Enable Paging
+.text
+.globl enablePaging
+enablePaging:
+cli
+push %ebp
+mov %esp, %ebp
+mov %cr0, %eax
+or $0x80000001, %eax
+mov %eax, %cr0
+mov %ebp, %esp
+pop %ebp
+sti
+ret
 
 # This will set up our new segment registers. We need to do
 # something special in order to set CS. We do what is called a
 # far jump. A jump that includes a segment as well as an offset.
-# This is declared in C as 'extern void gdt_flush() #'
+# This is declared in C as 'extern void gdt_flush()'
 .global gdt_flush     # Allows the C code to link to this
 .extern gp
 gdt_flush:
@@ -66,8 +94,7 @@ idt_load:
     lidt idtp
     ret	
 
-# In just a few pages in this tutorial, we will add our Interrupt
-# Service Routines (ISRs) right here!
+# Interrup Service Routines (ISRs) right here!
 .global isr0
 .global isr1
 .global isr2
@@ -328,7 +355,6 @@ isr31:
 # up for kernel mode segments, calls the C-level fault handler,
 # and finally restores the stack frame.
 isr_common_stub:
-    xchgw %bx, %bx
     pusha
     pushw %ds
     pushw %es

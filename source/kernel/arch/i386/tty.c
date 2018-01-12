@@ -19,7 +19,7 @@ static uint16_t* terminal_buffer;
 void terminal_initialize(void) {
 	terminal_row = 0;
 	terminal_column = 0;
-	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+	terminal_color = vga_entry_color(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
 	terminal_buffer = VGA_MEMORY;
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
@@ -44,24 +44,43 @@ void terminal_scroll(){
             terminal_buffer[i * VGA_WIDTH + m] = terminal_buffer[(i + 1) * VGA_WIDTH + m];
         }
     }
+ //   terminal_row--;
 }
 
 void terminal_putchar(char c) {
     unsigned char uc = c;
+    if (terminal_row >= VGA_HEIGHT) {
+        terminal_scroll();
+    }
     if (c == '\n') {
-        if (terminal_row == VGA_HEIGHT) {
+        if (terminal_row++ > VGA_HEIGHT) {
             terminal_scroll();
+            return;
         }
         else {
             terminal_column = 0;
-            terminal_row++;
             return;
         }
     }
-	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-        if (++terminal_row == VGA_HEIGHT) {
-            terminal_row = 0;
+    if (c == '\b') {
+        // Test if going back would change row
+        if (terminal_column - 1 <= 0) {
+            // Set column 0 to ' '
+            terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
+            // Move up one row
+            terminal_row--;
+            // set column to max
+            terminal_column = VGA_WIDTH-1;
+            }
+        terminal_putentryat(' ', terminal_color, terminal_column, terminal_row);
+        terminal_column--;
+        return;
+    }
+	if (++terminal_column == VGA_WIDTH-1) {
+		terminal_column = 1;
+        terminal_row++;
+        if (terminal_row == VGA_HEIGHT) {
+            terminal_scroll();
         }
     }
     terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);

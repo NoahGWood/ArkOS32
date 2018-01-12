@@ -4,9 +4,19 @@
 #include <kernel/system.h>
 #include <kernel/multiboot.h>
 
+typedef struct multiboot_memory_map_t {
+	unsigned int size;
+	unsigned int base_addr_low,base_addr_high;
+// You can also use: unsigned long long int base_addr; if supported.
+	unsigned int length_low,length_high;
+// You can also use: unsigned long long int length; if supported.
+	unsigned int type;
+};
+
 void kernel_main(multiboot_info_t* mbd, unsigned int magic) {
+    /* setup paging first */
     terminal_initialize();
-    gdt_install();
+    gdt_install();  
     idt_install();
     isrs_install();
     irq_install();
@@ -15,9 +25,12 @@ void kernel_main(multiboot_info_t* mbd, unsigned int magic) {
 	printf("Welcome to ArkOS!\n");
     printf("We are currently undergoing some development.\n");
     printf("Pardon our dust\n");
-    int i = 102;
-    printf("%s\n", i);
     timer_install();
     keyboard_install();
+    multiboot_memory_map_t* mmap = mbd->mmap_addr;
+	while(mmap < mbd->mmap_addr + mbd->mmap_length) {
+		mmap = (multiboot_memory_map_t*) ( (unsigned int)mmap + mmap->size + sizeof(mmap->size) );
+	}
+    paging_install();
     for (;;);
 }
